@@ -6,7 +6,7 @@
 #include <PubSubClient.h>
 
 // Relay Output Pin
-const int relay1=D1;
+const int relay1=D0;
 const int relay2=D3;
 
 // WIFI VARIABLES
@@ -102,10 +102,9 @@ void setup()
 void callback(char* topic, byte* payload, unsigned int length) 
 {
   String mess="";
-  for (int i = 0; i < length; i++) 
-  {
+  for (int i = 0; i < length; i++)
     mess+=(char)payload[i];
-  }
+ 
   if(mess[0] == 'f')
   {
     char fan = mess[1];
@@ -189,34 +188,53 @@ void callback(char* topic, byte* payload, unsigned int length)
   }
   else if(mess[0]=='t') // FOR TIMER STATE
   {
-    if(mess[1]=='s') // TIMER IN SET STATE
-    {
-      digitalWrite(buzzer,HIGH);
-      delay(150);
-      digitalWrite(buzzer,LOW);
-    }
-    else if(mess[1]=='o') // TIMER IN OFF STATE
-    {
-      digitalWrite(buzzer,HIGH);
-      delay(150);
-      digitalWrite(buzzer,LOW);
-      delay(150);
-      digitalWrite(buzzer,HIGH);
-      delay(150);
-      digitalWrite(buzzer,LOW);
-    }
+    if(mess[1] == 's') // TIMER IN SET STATE
+      doubleBeep();
+      
+    else if(mess[1] == 'o') // TIMER IN OFF STATE
+      alarmBeep();
   }
 }
 
+void doubleBeep()
+{
+  digitalWrite(buzzer,HIGH);
+  delay(50);
+  digitalWrite(buzzer,LOW);
+  delay(50);
+  digitalWrite(buzzer,HIGH);
+  delay(50);
+  digitalWrite(buzzer,LOW);
+}
+
+void singleBeep()
+{
+  digitalWrite(buzzer,HIGH);
+  delay(100);
+  digitalWrite(buzzer,LOW);
+}
+
+void alarmBeep()
+{
+  digitalWrite(buzzer,HIGH);
+  delay(150);
+  digitalWrite(buzzer,LOW);
+  delay(150);
+  digitalWrite(buzzer,HIGH);
+  delay(150);
+  digitalWrite(buzzer,LOW);
+}
 
 void loop() 
 {
   client.loop();
+
+  // Read Touch Buttons
   val1 = digitalRead(button1);
   val2 = digitalRead(button2);
   valLow=digitalRead(butLow);
   valHigh=digitalRead(butHigh);
-  Serial.println(val2);
+
   // GET APPROPRIATE TOUCH ACTIONS
   if(val1==HIGH)
   {
@@ -257,48 +275,25 @@ void loop()
     if(valHigh == HIGH)
     {
       if(currentSpeed == 5)
-      {
-        digitalWrite(buzzer,HIGH);
-        delay(50);
-        digitalWrite(buzzer,LOW);
-        delay(50);
-        digitalWrite(buzzer,HIGH);
-        delay(50);
-        digitalWrite(buzzer,LOW);
-      }
+        doubleBeep();
       else
       {
         currentSpeed+=1;
         String fanMsg = 'f' + String(currentSpeed,DEC);
-//        Serial.println("Current State is"+fanMsg);
         client.publish((char *) pubTopic.c_str(),(char *) fanMsg.c_str());
-        
-        digitalWrite(buzzer,HIGH);
-        delay(100);
-        digitalWrite(buzzer,LOW);
+        singleBeep();
       }
     }
     else if(valLow == HIGH)
     {
       if(currentSpeed == 0)
-      {
-        digitalWrite(buzzer,HIGH);
-        delay(50);
-        digitalWrite(buzzer,LOW);
-        delay(50);
-        digitalWrite(buzzer,HIGH);
-        delay(50);
-        digitalWrite(buzzer,LOW);
-      }
+        doubleBeep();
       else
       {
         currentSpeed-=1;
         String fanMsg = 'f' + String(currentSpeed,DEC);
-//        Serial.println("Current State is"+fanMsg);
         client.publish((char *) pubTopic.c_str(),(char *) fanMsg.c_str());   
-        digitalWrite(buzzer,HIGH);
-        delay(100);
-        digitalWrite(buzzer,LOW);
+        singleBeep();
       }
     }
   }
