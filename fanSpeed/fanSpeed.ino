@@ -10,15 +10,15 @@ const int relay1=D0;
 const int relay2=D3;
 
 // WIFI VARIABLES
-//const char* ssid = "Redmi";
-//const char* pass = "akul0000";
-//const char* mqttServer = "192.168.43.220";
-//const int mqttPort = 1883;
-
-const char* ssid = "B1004";
-const char* pass = "thisissparta";
-const char* mqttServer = "192.168.1.225";
+const char* ssid = "F-101";
+const char* pass = "lastsemester";
+const char* mqttServer = "192.168.0.103";
 const int mqttPort = 1883;
+
+//const char* ssid = "B1004";
+//const char* pass = "thisissparta";
+//const char* mqttServer = "192.168.1.225";
+//const int mqttPort = 1883;
 
 // MQTT Topics
 String pubTopic = "esp/receive";
@@ -153,7 +153,7 @@ void callback(char* topic, byte* payload, unsigned int length)
 //      }
 //      delay(50);
 //    }
-    Serial.write(currentState);
+    //Serial.write(currentState);
 //    Serial.println(currentState);
   }
   else if(mess[0]=='1')  // FOR RELAY 1
@@ -181,8 +181,9 @@ void callback(char* topic, byte* payload, unsigned int length)
     }
     else
     {
+        digitalWrite(led2,HIGH);
       digitalWrite(relay2,HIGH);
-      digitalWrite(led2,HIGH);
+      //digitalWrite(led2,HIGH);
       state2 = 1;
     }
   }
@@ -242,15 +243,17 @@ void loop()
       {
         digitalWrite(relay1,LOW);
         digitalWrite(led1,LOW);
-        state1 = 0;
-        client.publish((char *) pubTopic.c_str(),"10");
+        //delay(500);
+        client.publish((char *) pubTopic.c_str(),"11");
+        delay(500);
+
       }
       else
       {
         digitalWrite(relay1,HIGH);
         digitalWrite(led1,HIGH);
-        state1 = 1;
-        client.publish((char *) pubTopic.c_str(),"11");
+        client.publish((char *) pubTopic.c_str(),"10");
+        delay(500);
       }
   }
   else if(val2==HIGH)
@@ -259,21 +262,22 @@ void loop()
       {
         digitalWrite(relay2,LOW);
         digitalWrite(led2,LOW);
-        state2 = 0;
-        client.publish((char *) pubTopic.c_str(),"20");
+        client.publish((char *) pubTopic.c_str(),"21");
+        delay(500);
       }
       else
       {
         digitalWrite(relay2,HIGH);
         digitalWrite(led2,HIGH);
-        state2 = 1;
-        client.publish((char *) pubTopic.c_str(),"21");
+        client.publish((char *) pubTopic.c_str(),"20");
+        delay(500);
       }
   }
   else if(valLow==HIGH || valHigh==HIGH)
   {
     if(valHigh == HIGH)
     {
+      Serial.print("+\n");
       if(currentSpeed == 5)
         doubleBeep();
       else
@@ -286,6 +290,7 @@ void loop()
     }
     else if(valLow == HIGH)
     {
+      Serial.print("-\n");
       if(currentSpeed == 0)
         doubleBeep();
       else
